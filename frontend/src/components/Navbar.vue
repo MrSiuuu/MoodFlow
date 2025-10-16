@@ -12,7 +12,7 @@
           <template v-if="isAuthenticated">
             <li><RouterLink to="/dashboard">Dashboard</RouterLink></li>
             <li><RouterLink to="/analytics">Analytics</RouterLink></li>
-            <li><RouterLink to="/chat">Chat IA</RouterLink></li>
+            
             <li><RouterLink to="/calendar">Calendrier</RouterLink></li>
             <li><RouterLink to="/about">À propos</RouterLink></li>
             <li class="divider"></li>
@@ -45,11 +45,7 @@
             Analytics
           </RouterLink>
         </li>
-        <li>
-          <RouterLink to="/chat" class="btn btn-ghost">
-            Chat IA
-          </RouterLink>
-        </li>
+        
         <li>
           <RouterLink to="/calendar" class="btn btn-ghost">
             Calendrier

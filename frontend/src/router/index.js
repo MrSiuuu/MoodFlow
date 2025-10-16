@@ -35,12 +35,6 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/chat',
-      name: 'chat',
-      component: () => import('@/views/Chat.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
       path: '/calendar',
       name: 'calendar',
       component: () => import('@/views/Calendar.vue'),
@@ -77,12 +71,6 @@ const router = createRouter({
       component: () => import('@/views/Help.vue'),
       meta: { requiresAuth: false }
     },
-    {
-      path: '/tutorial',
-      name: 'tutorial',
-      component: () => import('@/views/Help.vue'),
-      meta: { requiresAuth: false }
-    },
     // Pages légales
     {
       path: '/privacy',
@@ -99,12 +87,6 @@ const router = createRouter({
     {
       path: '/cookies',
       name: 'cookies',
-      component: () => import('@/views/Privacy.vue'),
-      meta: { requiresAuth: false }
-    },
-    {
-      path: '/gdpr',
-      name: 'gdpr',
       component: () => import('@/views/Privacy.vue'),
       meta: { requiresAuth: false }
     },
