@@ -3,6 +3,16 @@
     <div class="max-w-md w-full space-y-8">
       <!-- Header -->
       <div class="text-center">
+        <!-- Bouton retour -->
+        <div class="flex justify-start mb-4">
+          <RouterLink to="/" class="btn btn-ghost btn-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Retour à l'accueil
+          </RouterLink>
+        </div>
+        
         <div class="text-4xl mb-4">🌈</div>
         <h2 class="text-3xl font-bold text-gradient">Créer un compte</h2>
         <p class="mt-2 text-base-content/70">
