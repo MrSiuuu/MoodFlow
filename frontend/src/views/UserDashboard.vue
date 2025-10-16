@@ -38,12 +38,7 @@
             </svg>
             Voir mes analyses
           </RouterLink>
-          <RouterLink to="/chat" class="btn btn-outline btn-lg">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-            </svg>
-            Chat avec l'IA
-          </RouterLink>
+          
         </div>
       </div>
     </section>
@@ -168,27 +163,7 @@
       </div>
     </section>
 
-    <!-- AI Insights -->
-    <section class="py-8 bg-base-200">
-      <div class="container mx-auto px-4">
-        <h2 class="text-2xl font-bold mb-6">Insights de l'IA</h2>
-        
-        <div class="card bg-gradient-to-r from-primary to-secondary text-primary-content shadow-xl">
-          <div class="card-body">
-            <div class="flex items-start gap-4">
-              <div class="text-4xl">🤖</div>
-              <div>
-                <h3 class="text-xl font-bold mb-2">Conseil personnalisé</h3>
-                <p class="opacity-90">
-                  {{ aiInsight || "L'IA analyse tes données pour te donner des conseils personnalisés. Reviens demain pour voir tes insights !" }}
-                </p>
-                <button class="btn btn-accent btn-sm mt-4">Demander un conseil</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    
   </div>
 </template>
 
@@ -207,7 +182,6 @@ const weeklyStats = ref({
   bestDay: 'Mardi',
   currentStreak: 3
 })
-const aiInsight = ref('')
 
 // Computed
 const user = computed(() => authStore.userProfile || authStore.user)
@@ -294,19 +268,10 @@ const loadRecentEntries = async () => {
   }
 }
 
-const loadAIInsight = async () => {
-  try {
-    // Simulation de données - à remplacer par un vrai appel API
-    aiInsight.value = 'Tu as tendance à être plus heureux le weekend. Essaie de reproduire certaines activités du weekend pendant la semaine !'
-  } catch (error) {
-    console.error('Erreur lors du chargement de l\'insight IA:', error)
-  }
-}
 
 // Lifecycle
 onMounted(() => {
   loadTodayMood()
   loadRecentEntries()
-  loadAIInsight()
 })
 </script>

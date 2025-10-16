@@ -5,7 +5,6 @@
       <h6 class="footer-title">Services</h6>
       <RouterLink to="/dashboard" class="link link-hover">Dashboard</RouterLink>
       <RouterLink to="/analytics" class="link link-hover">Analytics</RouterLink>
-      <RouterLink to="/chat" class="link link-hover">Chat IA</RouterLink>
       <RouterLink to="/calendar" class="link link-hover">Calendrier</RouterLink>
     </nav>
     <nav>
@@ -13,14 +12,12 @@
       <RouterLink to="/help" class="link link-hover">Aide</RouterLink>
       <RouterLink to="/contact" class="link link-hover">Contact</RouterLink>
       <RouterLink to="/faq" class="link link-hover">FAQ</RouterLink>
-      <RouterLink to="/tutorial" class="link link-hover">Tutoriel</RouterLink>
     </nav>
     <nav>
       <h6 class="footer-title">Légal</h6>
       <RouterLink to="/privacy" class="link link-hover">Politique de confidentialité</RouterLink>
       <RouterLink to="/terms" class="link link-hover">Conditions d'utilisation</RouterLink>
       <RouterLink to="/cookies" class="link link-hover">Politique des cookies</RouterLink>
-      <RouterLink to="/gdpr" class="link link-hover">RGPD</RouterLink>
     </nav>
   </footer>
   
