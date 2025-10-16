@@ -1,0 +1,28 @@
+{
+  "name": "moodflow-backend",
+  "version": "1.0.0",
+  "description": "MoodFlow Backend API",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "openai": "^4.20.1",
+    "pino": "^8.17.2",
+    "pino-pretty": "^10.3.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2"
+  }
+}

@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-base-100 text-base-content;
+  }
+}
+
+@layer components {
+  .mood-score-1 {
+    @apply bg-mood-1 text-white;
+  }
+  
+  .mood-score-2 {
+    @apply bg-mood-2 text-white;
+  }
+  
+  .mood-score-3 {
+    @apply bg-mood-3 text-white;
+  }
+  
+  .mood-score-4 {
+    @apply bg-mood-4 text-white;
+  }
+  
+  .mood-score-5 {
+    @apply bg-mood-5 text-white;
+  }
+  
+  .mood-border-1 {
+    @apply border-mood-1;
+  }
+  
+  .mood-border-2 {
+    @apply border-mood-2;
+  }
+  
+  .mood-border-3 {
+    @apply border-mood-3;
+  }
+  
+  .mood-border-4 {
+    @apply border-mood-4;
+  }
+  
+  .mood-border-5 {
+    @apply border-mood-5;
+  }
+  
+  .btn-mood {
+    @apply btn btn-circle w-16 h-16 text-2xl font-bold transition-all duration-300 hover:scale-110 active:scale-95;
+  }
+  
+  .card-mood {
+    @apply card bg-base-100 shadow-xl border border-base-300 transition-all duration-300 hover:shadow-2xl;
+  }
+  
+  .fade-enter-active,
+  .fade-leave-active {
+    @apply transition-opacity duration-300;
+  }
+  
+  .fade-enter-from,
+  .fade-leave-to {
+    @apply opacity-0;
+  }
+  
+  .slide-enter-active,
+  .slide-leave-active {
+    @apply transition-transform duration-300;
+  }
+  
+  .slide-enter-from {
+    @apply transform -translate-x-full;
+  }
+  
+  .slide-leave-to {
+    @apply transform translate-x-full;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+  }
+  
+  .bg-gradient-mood {
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 25%, #eab308 50%, #22c55e 75%, #3b82f6 100%);
+  }
+  
+  .glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
+  }
+  
+  .glass-dark {
+    @apply bg-black/10 backdrop-blur-md border border-black/20;
+  }
+}
