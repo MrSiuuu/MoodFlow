@@ -189,6 +189,21 @@ export const useAuthStore = defineStore('auth', () => {
       
       if (error) throw error
 
+      // Nettoyer manuellement le localStorage
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+      const urlParts = supabaseUrl.split('//')[1].split('.')[0]
+      const storageKey = `sb-${urlParts}-auth-token`
+      
+      // Supprimer le token Supabase du localStorage
+      localStorage.removeItem(storageKey)
+      
+      // Supprimer tous les autres tokens Supabase possibles
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-') && key.includes('auth-token')) {
+          localStorage.removeItem(key)
+        }
+      })
+
       user.value = null
       userProfile.value = null
       toast.success('Déconnexion réussie')
