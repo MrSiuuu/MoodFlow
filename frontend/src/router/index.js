@@ -14,7 +14,7 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/views/Login.vue'),
-      meta: { requiresAuth: false }
+      meta: { requiresAuth: false, userOnly: true }
     },
     {
       path: '/register',
@@ -23,28 +23,46 @@ const router = createRouter({
       meta: { requiresAuth: false }
     },
     {
+      path: '/admin/login',
+      name: 'admin-login',
+      component: () => import('@/views/AdminLogin.vue'),
+      meta: { requiresAuth: false, adminLoginPage: true }
+    },
+    {
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('@/views/Dashboard.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, userOnly: true }
     },
     {
       path: '/analytics',
       name: 'analytics',
       component: () => import('@/views/Analytics.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, userOnly: true }
     },
     {
       path: '/calendar',
       name: 'calendar',
       component: () => import('@/views/Calendar.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, userOnly: true }
+    },
+    {
+      path: '/chat',
+      name: 'chat',
+      component: () => import('@/views/Chat.vue'),
+      meta: { requiresAuth: true, userOnly: true }
     },
     {
       path: '/profile',
       name: 'profile',
       component: () => import('@/views/Profile.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('@/views/AdminDashboard.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true }
     },
     // Pages publiques
     {
@@ -102,31 +120,53 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
-  // Attendre que l'initialisation soit terminée
-  if (authStore.loading) {
-    // Attendre un peu que l'init se termine
-    await new Promise(resolve => setTimeout(resolve, 100))
+  // Attendre que l'auth soit initialisé (uniquement à la première navigation)
+  if (!authStore.initialized) {
+    await authStore.initialize()
   }
   
   // Vérifier si l'utilisateur est connecté
-  if (to.meta.requiresAuth) {
-    if (!authStore.isAuthenticated) {
-      console.log('Accès refusé - utilisateur non authentifié')
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    // Rediriger vers la bonne page de connexion selon le type de route
+    if (to.meta.requiresAdmin) {
+      next('/admin/login')
+    } else {
       next('/login')
-      return
     }
-    
-    // Vérifier les rôles spécifiques
-    if (to.meta.requiresAdmin && !authStore.isAdmin) {
-      console.log('Accès refusé - droits admin requis')
-      next('/dashboard')
-      return
-    }
+    return
   }
   
-  // Rediriger les utilisateurs connectés depuis login/register
-  if ((to.name === 'login' || to.name === 'register') && authStore.isAuthenticated) {
+  // Vérifier les rôles admin (routes /admin/*)
+  if (to.meta.requiresAdmin && !authStore.isAdmin) {
+    console.warn('Accès refusé : droits admin requis')
     next('/dashboard')
+    return
+  }
+  
+  // Empêcher les admins d'accéder aux routes utilisateur
+  if (to.meta.userOnly && authStore.isAdmin) {
+    console.warn('Accès refusé : route réservée aux utilisateurs')
+    next('/admin')
+    return
+  }
+  
+  // Rediriger si déjà connecté selon le rôle
+  if ((to.name === 'login' || to.name === 'register') && authStore.isAuthenticated) {
+    if (authStore.isAdmin) {
+      next('/admin')
+    } else {
+      next('/dashboard')
+    }
+    return
+  }
+  
+  // Rediriger les utilisateurs connectés qui essaient d'accéder à la page de login admin
+  if (to.name === 'admin-login' && authStore.isAuthenticated) {
+    if (authStore.isAdmin) {
+      next('/admin')
+    } else {
+      next('/dashboard')
+    }
     return
   }
   

@@ -1,243 +1,327 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { supabase } from '@/lib/supabase'
+import { supabase, authHelpers, dbHelpers, onAuthStateChange } from '@/lib/supabase'
 import { useToast } from 'vue-toastification'
+import router from '@/router'
 
 export const useAuthStore = defineStore('auth', () => {
+  // État
   const user = ref(null)
   const userProfile = ref(null)
+  const session = ref(null)
   const loading = ref(false)
+  const initialized = ref(false)
+  const isSigningOut = ref(false)
   const toast = useToast()
 
-  const isAuthenticated = computed(() => {
-    return !!(user.value && userProfile.value)
-  })
+  // Getters
+  const isAuthenticated = computed(() => !!user.value && !!session.value)
+  const isAdmin = computed(() => userProfile.value?.role === 'admin')
+  const userEmail = computed(() => user.value?.email || '')
+  const userName = computed(() => userProfile.value?.display_name || user.value?.email?.split('@')[0] || 'Utilisateur')
 
-  // Vérifier si l'utilisateur est admin
-  const isAdmin = computed(() => {
-    return userProfile.value?.role === 'admin'
-  })
+  // Actions
+  
+  /**
+   * Initialiser le store (vérifier la session existante)
+   */
+  const initialize = async () => {
+    if (initialized.value) return
 
-  // Initialiser l'utilisateur au démarrage
-  const init = async () => {
     try {
       loading.value = true
-      const { data: { session }, error } = await supabase.auth.getSession()
+      
+      // Récupérer la session actuelle
+      const { session: currentSession, error } = await authHelpers.getSession()
       
       if (error) {
-        console.error('Erreur session:', error)
-        user.value = null
-        userProfile.value = null
+        console.error('Erreur initialisation session:', error)
         return
       }
 
-      if (session?.user) {
-        // Vérifier que le token est valide
-        const { data: { user: userData }, error: userError } = await supabase.auth.getUser()
+      if (currentSession) {
+        session.value = currentSession
+        user.value = currentSession.user
         
-        if (userError || !userData) {
-          console.error('Token invalide:', userError)
-          user.value = null
-          userProfile.value = null
-          return
-        }
-
-        user.value = userData
-        // Charger le profil utilisateur
+        // Charger le profil
         await loadUserProfile()
       }
+
+      // Écouter les changements d'authentification
+      onAuthStateChange(async (event, newSession) => {
+        console.log('Auth state changed:', event)
+        
+        session.value = newSession
+        user.value = newSession?.user || null
+
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          await loadUserProfile()
+        }
+
+        if (event === 'SIGNED_OUT') {
+          user.value = null
+          userProfile.value = null
+          session.value = null
+        }
+      })
+
+      initialized.value = true
     } catch (error) {
       console.error('Erreur initialisation auth:', error)
-      user.value = null
-      userProfile.value = null
     } finally {
       loading.value = false
     }
   }
 
-  // Charger le profil utilisateur depuis la table profiles
+  /**
+   * Charger le profil utilisateur depuis la DB
+   */
   const loadUserProfile = async () => {
+    if (!user.value) return
+
     try {
-      if (!user.value) return null
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.value.id)
-        .single()
-
+      const { data, error } = await dbHelpers.getProfile(user.value.id)
+      
       if (error) {
         console.error('Erreur chargement profil:', error)
-        
-        // Si le profil n'existe pas, créer un profil par défaut
-        if (error.code === 'PGRST116') {
-          console.log('Profil non trouvé, création d\'un profil par défaut')
-          const defaultProfile = {
-            id: user.value.id,
-            email: user.value.email,
-            display_name: user.value.user_metadata?.display_name || user.value.email,
-            role: 'user'
-          }
-          userProfile.value = defaultProfile
-          return defaultProfile
-        }
-        
-        // Si erreur de permission (RLS), créer un profil par défaut
-        if (error.code === '42501') {
-          console.log('Erreur RLS, création d\'un profil par défaut')
-          const defaultProfile = {
-            id: user.value.id,
-            email: user.value.email,
-            display_name: user.value.user_metadata?.display_name || user.value.email,
-            role: 'user'
-          }
-          userProfile.value = defaultProfile
-          return defaultProfile
-        }
-        
-        throw error
+        return
       }
 
       userProfile.value = data
-      return data
     } catch (error) {
-      console.error('Erreur lors du chargement du profil:', error)
-      
-      // En cas d'erreur, créer un profil par défaut pour permettre la connexion
-      const fallbackProfile = {
-        id: user.value.id,
-        email: user.value.email,
-        display_name: user.value.user_metadata?.display_name || user.value.email,
-        role: 'user'
-      }
-      
-      userProfile.value = fallbackProfile
-      return fallbackProfile
+      console.error('Erreur chargement profil:', error)
     }
   }
 
-  // Connexion
-  const signIn = async (email, password) => {
+  /**
+   * Inscription
+   */
+  const signUp = async (email, password, displayName = '') => {
     try {
       loading.value = true
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+
+      const { data, error } = await authHelpers.signUp(email, password, {
+        display_name: displayName || email.split('@')[0],
+        newsletter: false,
       })
 
-      if (error) throw error
-
-      // Vérifier que l'utilisateur est valide
-      const { data: { user: userData }, error: userError } = await supabase.auth.getUser()
-      
-      if (userError || !userData) {
-        throw new Error('Token invalide')
+      if (error) {
+        console.error('Erreur inscription:', error)
+        toast.error(error.message || 'Erreur lors de l\'inscription')
+        return { success: false, error }
       }
 
-      user.value = userData
-      await loadUserProfile()
-
-      if (!userProfile.value) {
-        throw new Error('Impossible de charger le profil utilisateur')
+      // Si l'inscription nécessite une confirmation par email
+      if (data.user && !data.session) {
+        toast.info('Vérifiez votre email pour confirmer votre inscription')
+        return { success: true, requiresEmailConfirmation: true }
       }
 
-      toast.success('Connexion réussie !')
-      return { success: true }
-    } catch (error) {
-      console.error('Erreur connexion:', error)
-      user.value = null
-      userProfile.value = null
-      toast.error(error.message || 'Erreur de connexion')
-      return { success: false, error: error.message }
-    } finally {
-      loading.value = false
-    }
-  }
+      // Si l'inscription est immédiate
+      if (data.session) {
+        session.value = data.session
+        user.value = data.user
+        await loadUserProfile()
+        toast.success('Compte créé avec succès !')
+        return { success: true }
+      }
 
-  // Inscription
-  const signUp = async (email, password, displayName) => {
-    try {
-      loading.value = true
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            display_name: displayName
-          }
-        }
-      })
-
-      if (error) throw error
-
-      toast.success('Compte créé ! Vérifiez votre email.')
       return { success: true }
     } catch (error) {
       console.error('Erreur inscription:', error)
-      toast.error(error.message || 'Erreur d\'inscription')
-      return { success: false, error: error.message }
+      toast.error('Erreur lors de l\'inscription')
+      return { success: false, error }
     } finally {
       loading.value = false
     }
   }
 
-  // Déconnexion
+  /**
+   * Connexion
+   */
+  const signIn = async (email, password) => {
+    try {
+      loading.value = true
+
+      const { data, error } = await authHelpers.signIn(email, password)
+
+      if (error) {
+        console.error('Erreur connexion:', error)
+        toast.error('Email ou mot de passe incorrect')
+        return { success: false, error }
+      }
+
+      if (data.session) {
+        session.value = data.session
+        user.value = data.user
+        await loadUserProfile()
+        toast.success(`Bienvenue ${userName.value} !`)
+        return { success: true }
+      }
+
+      return { success: false }
+    } catch (error) {
+      console.error('Erreur connexion:', error)
+      toast.error('Erreur lors de la connexion')
+      return { success: false, error }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * Déconnexion
+   */
   const signOut = async () => {
     try {
       loading.value = true
-      const { error } = await supabase.auth.signOut()
-      
-      if (error) throw error
+      isSigningOut.value = true
 
-      // Nettoyer manuellement le localStorage
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-      const urlParts = supabaseUrl.split('//')[1].split('.')[0]
-      const storageKey = `sb-${urlParts}-auth-token`
-      
-      // Supprimer le token Supabase du localStorage
-      localStorage.removeItem(storageKey)
-      
-      // Supprimer tous les autres tokens Supabase possibles
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('sb-') && key.includes('auth-token')) {
-          localStorage.removeItem(key)
-        }
-      })
+      const { error } = await authHelpers.signOut()
 
+      if (error) {
+        console.error('Erreur déconnexion:', error)
+        toast.error('Erreur lors de la déconnexion')
+        isSigningOut.value = false
+        return { success: false, error }
+      }
+
+      // Réinitialiser l'état
       user.value = null
       userProfile.value = null
-      toast.success('Déconnexion réussie')
+      session.value = null
+
+      // Toast avec délai pour qu'il soit visible
+      toast.success('Déconnexion réussie ! À bientôt 👋')
+      
+      // Attendre un peu pour que le toast soit visible
+      await new Promise(resolve => setTimeout(resolve, 800))
+      
+      // Redirection smooth avec Vue Router
+      router.push('/')
+      
       return { success: true }
     } catch (error) {
       console.error('Erreur déconnexion:', error)
-      toast.error('Erreur de déconnexion')
-      return { success: false, error: error.message }
+      toast.error('Erreur lors de la déconnexion')
+      return { success: false, error }
+    } finally {
+      loading.value = false
+      isSigningOut.value = false
+    }
+  }
+
+  /**
+   * Réinitialiser le mot de passe
+   */
+  const resetPassword = async (email) => {
+    try {
+      loading.value = true
+
+      const { data, error } = await authHelpers.resetPassword(email)
+
+      if (error) {
+        console.error('Erreur réinitialisation mot de passe:', error)
+        toast.error('Erreur lors de l\'envoi de l\'email')
+        return { success: false, error }
+      }
+
+      toast.success('Email de réinitialisation envoyé !')
+      return { success: true }
+    } catch (error) {
+      console.error('Erreur réinitialisation mot de passe:', error)
+      toast.error('Erreur lors de l\'envoi de l\'email')
+      return { success: false, error }
     } finally {
       loading.value = false
     }
   }
 
-  // Écouter les changements d'état d'authentification
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
-      user.value = session.user
-      await loadUserProfile()
-    } else if (event === 'SIGNED_OUT') {
-      user.value = null
-      userProfile.value = null
+  /**
+   * Mettre à jour le profil
+   */
+  const updateProfile = async (updates) => {
+    try {
+      loading.value = true
+
+      if (!user.value) {
+        toast.error('Utilisateur non connecté')
+        return { success: false }
+      }
+
+      // Mettre à jour dans la base de données
+      const { data, error } = await dbHelpers.updateProfile(user.value.id, updates)
+
+      if (error) {
+        console.error('Erreur mise à jour profil:', error)
+        toast.error('Erreur lors de la mise à jour du profil')
+        return { success: false, error }
+      }
+
+      // Mettre à jour le state local
+      userProfile.value = data
+      toast.success('Profil mis à jour !')
+
+      return { success: true, data }
+    } catch (error) {
+      console.error('Erreur mise à jour profil:', error)
+      toast.error('Erreur lors de la mise à jour du profil')
+      return { success: false, error }
+    } finally {
+      loading.value = false
     }
-  })
+  }
+
+  /**
+   * Mettre à jour le mot de passe
+   */
+  const updatePassword = async (newPassword) => {
+    try {
+      loading.value = true
+
+      const { data, error } = await authHelpers.updatePassword(newPassword)
+
+      if (error) {
+        console.error('Erreur mise à jour mot de passe:', error)
+        toast.error('Erreur lors de la mise à jour du mot de passe')
+        return { success: false, error }
+      }
+
+      toast.success('Mot de passe mis à jour !')
+      return { success: true }
+    } catch (error) {
+      console.error('Erreur mise à jour mot de passe:', error)
+      toast.error('Erreur lors de la mise à jour du mot de passe')
+      return { success: false, error }
+    } finally {
+      loading.value = false
+    }
+  }
 
   return {
+    // State
     user,
     userProfile,
+    session,
     loading,
+    initialized,
+    isSigningOut,
+    
+    // Getters
     isAuthenticated,
     isAdmin,
-    init,
-    signIn,
+    userEmail,
+    userName,
+    
+    // Actions
+    initialize,
+    loadUserProfile,
     signUp,
+    signIn,
     signOut,
-    loadUserProfile
+    resetPassword,
+    updateProfile,
+    updatePassword,
   }
 })
+

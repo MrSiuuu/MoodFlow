@@ -1,36 +1,44 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-base-100 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-error/10 to-warning/10 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
-    <!-- Header -->
-    <div class="text-center">
-      <h1 class="text-4xl font-bold text-gradient mb-2">
-        🌈 MoodFlow
-      </h1>
-      <h2 class="text-3xl font-bold">
-        Connexion Utilisateur
-      </h2>
-      <p class="mt-2 text-base-content/70">
-        Ou 
-        <RouterLink to="/register" class="link link-primary">
-          créez un compte
-        </RouterLink>
-      </p>
-    </div>
+      <!-- Header avec badge Admin -->
+      <div class="text-center">
+        <div class="flex justify-center mb-4">
+          <div class="badge badge-error badge-lg gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            ADMINISTRATION
+          </div>
+        </div>
+        <h1 class="text-4xl font-bold mb-2">
+          🔐 Connexion Administrateur
+        </h1>
+        <p class="mt-2 text-base-content/70">
+          Réservé aux administrateurs MoodFlow
+        </p>
+        <div class="alert alert-warning mt-4 text-left">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span class="text-sm">Cette page est uniquement pour les comptes administrateurs. Si vous êtes un utilisateur standard, veuillez utiliser la <RouterLink to="/login" class="link link-primary font-semibold">page de connexion utilisateur</RouterLink>.</span>
+        </div>
+      </div>
 
-      <!-- Formulaire de connexion -->
+      <!-- Formulaire de connexion Admin -->
       <form @submit.prevent="handleSubmit" class="mt-8 space-y-6">
-        <div class="card bg-base-100 shadow-xl">
+        <div class="card bg-base-100 shadow-xl border-2 border-error/20">
           <div class="card-body">
             <!-- Email -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text">Email</span>
+                <span class="label-text font-semibold">Email Administrateur</span>
               </label>
               <input
                 v-model="formData.email"
                 type="email"
-                placeholder="votre@email.com"
-                class="input input-bordered w-full"
+                placeholder="admin@moodflow.com"
+                class="input input-bordered input-error w-full"
                 :class="{ 'input-error': errors.email }"
                 required
                 autofocus
@@ -44,14 +52,14 @@
             <!-- Mot de passe -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text">Mot de passe</span>
+                <span class="label-text font-semibold">Mot de passe</span>
               </label>
               <div class="relative">
                 <input
                   v-model="formData.password"
                   :type="showPassword ? 'text' : 'password'"
                   placeholder="••••••••"
-                  class="input input-bordered w-full pr-10"
+                  class="input input-bordered input-error w-full pr-10"
                   :class="{ 'input-error': errors.password }"
                   required
                   :disabled="authStore.loading"
@@ -76,88 +84,48 @@
               </label>
             </div>
 
-            <!-- Se souvenir de moi + Mot de passe oublié -->
+            <!-- Se souvenir -->
             <div class="flex items-center justify-between mt-2">
               <label class="label cursor-pointer gap-2">
-                <input v-model="formData.remember" type="checkbox" class="checkbox checkbox-sm" />
+                <input v-model="formData.remember" type="checkbox" class="checkbox checkbox-error checkbox-sm" />
                 <span class="label-text">Se souvenir de moi</span>
               </label>
-              <button
-                type="button"
-                @click="showForgotPassword = true"
-                class="link link-primary text-sm"
-              >
-                Mot de passe oublié ?
-              </button>
+            </div>
+
+            <!-- Message d'erreur si pas admin -->
+            <div v-if="notAdminError" class="alert alert-error mt-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Ce compte n'a pas les droits d'administrateur. Veuillez utiliser un compte admin ou <RouterLink to="/login" class="link link-primary font-semibold">connectez-vous en tant qu'utilisateur</RouterLink>.</span>
             </div>
 
             <!-- Bouton de connexion -->
             <div class="form-control mt-6">
               <button
                 type="submit"
-                class="btn btn-primary w-full"
+                class="btn btn-error w-full"
                 :class="{ 'loading': authStore.loading }"
                 :disabled="authStore.loading"
               >
-                <span v-if="!authStore.loading">Se connecter</span>
-                <span v-else>Connexion...</span>
+                <svg v-if="!authStore.loading" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <span v-if="!authStore.loading">Accéder à l'administration</span>
+                <span v-else>Vérification...</span>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Lien vers inscription -->
+        <!-- Lien retour -->
         <div class="text-center">
-          <p class="text-base-content/70">
-            Vous n'avez pas de compte ?
-            <RouterLink to="/register" class="link link-primary font-semibold">
-              S'inscrire gratuitement
-            </RouterLink>
-          </p>
+          <RouterLink to="/" class="link link-primary">
+            ← Retour à l'accueil
+          </RouterLink>
         </div>
       </form>
     </div>
-
-    <!-- Modal Mot de passe oublié -->
-    <dialog ref="forgotPasswordModal" class="modal" :class="{ 'modal-open': showForgotPassword }">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">Réinitialiser le mot de passe</h3>
-        <form @submit.prevent="handleForgotPassword">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Email</span>
-            </label>
-            <input
-              v-model="resetEmail"
-              type="email"
-              placeholder="votre@email.com"
-              class="input input-bordered w-full"
-              required
-            />
-          </div>
-          <div class="modal-action">
-            <button
-              type="button"
-              @click="showForgotPassword = false"
-              class="btn btn-ghost"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              :class="{ 'loading': authStore.loading }"
-              :disabled="authStore.loading"
-            >
-              Envoyer
-            </button>
-          </div>
-        </form>
-      </div>
-      <form method="dialog" class="modal-backdrop">
-        <button @click="showForgotPassword = false">close</button>
-      </form>
-    </dialog>
   </div>
 </template>
 
@@ -184,13 +152,13 @@ const errors = reactive({
 })
 
 const showPassword = ref(false)
-const showForgotPassword = ref(false)
-const resetEmail = ref('')
+const notAdminError = ref(false)
 
 // Validation du formulaire
 const validateForm = () => {
   errors.email = ''
   errors.password = ''
+  notAdminError.value = false
   
   if (!formData.email) {
     errors.email = 'L\'email est requis'
@@ -222,40 +190,21 @@ const handleSubmit = async () => {
   const result = await authStore.signIn(formData.email, formData.password)
   
   if (result.success) {
-    // Vérifier que ce n'est pas un admin qui se connecte ici
+    // Vérifier que l'utilisateur est bien admin
     if (authStore.isAdmin) {
-      toast.error('Les administrateurs doivent utiliser la page de connexion admin')
-      await authStore.signOut()
-      router.push('/admin/login')
+      toast.success('Bienvenue Administrateur !')
+      router.push('/admin')
     } else {
-      // Rediriger vers le dashboard utilisateur
-      router.push('/dashboard')
+      // Pas admin, déconnecter et afficher erreur
+      notAdminError.value = true
+      await authStore.signOut()
+      toast.error('Accès refusé : droits administrateur requis')
     }
-  }
-}
-
-// Mot de passe oublié
-const handleForgotPassword = async () => {
-  if (!resetEmail.value) {
-    toast.error('Veuillez entrer votre email')
-    return
-  }
-  
-  const result = await authStore.resetPassword(resetEmail.value)
-  
-  if (result.success) {
-    showForgotPassword.value = false
-    resetEmail.value = ''
   }
 }
 </script>
 
 <style scoped>
-.text-gradient {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* Pas de styles personnalisés nécessaires */
 </style>
 

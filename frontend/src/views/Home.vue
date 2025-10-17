@@ -41,7 +41,7 @@
             </RouterLink>
             <RouterLink 
               v-else
-              to="/dashboard" 
+              :to="authStore.isAdmin ? '/admin' : '/dashboard'" 
               class="btn btn-primary btn-lg px-4 sm:px-8 animate-bounce-gentle w-full sm:w-auto"
             >
               <svg class="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,7 +148,7 @@
         </RouterLink>
         <RouterLink 
           v-else
-          to="/dashboard" 
+          :to="authStore.isAdmin ? '/admin' : '/dashboard'" 
           class="btn btn-accent btn-lg px-8 text-lg"
         >
           Aller au Dashboard
