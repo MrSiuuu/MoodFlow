@@ -72,11 +72,8 @@
           <div class="card bg-base-100 shadow-xl">
             <div class="card-body text-center">
               <div class="avatar mb-4">
-                <div class="w-20 h-20 rounded-full bg-primary text-primary-content flex items-center justify-center">
-                  <span class="text-xl font-bold">DV</span>
-                </div>
               </div>
-              <h3 class="card-title justify-center text-lg">Alex Martin</h3>
+              <h3 class="card-title justify-center text-lg">Issa </h3>
               <p class="text-primary font-semibold text-sm">Développeur Full-Stack</p>
               <p class="text-xs text-base-content/70">
                 Expert en développement web moderne avec Vue.js, Node.js et architectures microservices.
@@ -84,28 +81,23 @@
               <div class="card-actions justify-center mt-3">
                 <div class="badge badge-outline badge-sm">Vue.js</div>
                 <div class="badge badge-outline badge-sm">Node.js</div>
-                <div class="badge badge-outline badge-sm">TypeScript</div>
               </div>
             </div>
           </div>
 
-          <!-- Data Scientist -->
+           <!-- Data Scientist -->
           <div class="card bg-base-100 shadow-xl">
             <div class="card-body text-center">
-              <div class="avatar mb-4">
-                <div class="w-20 h-20 rounded-full bg-secondary text-secondary-content flex items-center justify-center">
-                  <span class="text-xl font-bold">DS</span>
-                </div>
+              <div class="avatar mb-4 mx-auto">
               </div>
-              <h3 class="card-title justify-center text-lg">Sarah Chen</h3>
-              <p class="text-secondary font-semibold text-sm">Data Scientist</p>
+              <h3 class="card-title justify-center text-lg">Frédéric </h3>
+              <p class="text-secondary font-semibold text-sm">Développeur Full-Stack</p>
               <p class="text-xs text-base-content/70">
-                Spécialisée en analyse de données, machine learning et visualisation pour l'IA personnalisée.
+                Expert en développement web moderne avec Vue.js, Node.js et architectures microservices.
               </p>
               <div class="card-actions justify-center mt-3">
-                <div class="badge badge-outline badge-sm">Python</div>
-                <div class="badge badge-outline badge-sm">ML</div>
-                <div class="badge badge-outline badge-sm">Analytics</div>
+                <div class="badge badge-outline badge-sm">Vue.js</div>
+                <div class="badge badge-outline badge-sm">Node.js</div>
               </div>
             </div>
           </div>
@@ -114,19 +106,15 @@
           <div class="card bg-base-100 shadow-xl">
             <div class="card-body text-center">
               <div class="avatar mb-4">
-                <div class="w-20 h-20 rounded-full bg-accent text-accent-content flex items-center justify-center">
-                  <span class="text-xl font-bold">AI</span>
-                </div>
               </div>
-              <h3 class="card-title justify-center text-lg">Marcus Johnson</h3>
-              <p class="text-accent font-semibold text-sm">IA Engineer</p>
+              <h3 class="card-title justify-center text-lg">Jean</h3>
+              <p class="text-accent font-semibold text-sm">Développeur Full-Stack</p>
               <p class="text-xs text-base-content/70">
-                Expert en intelligence artificielle, NLP et intégration d'APIs pour des conseils personnalisés.
+                Expert en développement web moderne avec Vue.js, Node.js et architectures microservices.
               </p>
               <div class="card-actions justify-center mt-3">
-                <div class="badge badge-outline badge-sm">OpenAI</div>
-                <div class="badge badge-outline badge-sm">NLP</div>
-                <div class="badge badge-outline badge-sm">APIs</div>
+                <div class="badge badge-outline badge-sm">Vue.js</div>
+                <div class="badge badge-outline badge-sm">Node.js</div>
               </div>
             </div>
           </div>
@@ -135,12 +123,9 @@
           <div class="card bg-base-100 shadow-xl">
             <div class="card-body text-center">
               <div class="avatar mb-4">
-                <div class="w-20 h-20 rounded-full bg-info text-info-content flex items-center justify-center">
-                  <span class="text-xl font-bold">DO</span>
-                </div>
               </div>
-              <h3 class="card-title justify-center text-lg">Emma Rodriguez</h3>
-              <p class="text-info font-semibold text-sm">DevOps & Cloud</p>
+              <h3 class="card-title justify-center text-lg">Florent </h3>
+              <p class="text-info font-semibold text-sm">infrastructure & Cloud</p>
               <p class="text-xs text-base-content/70">
                 Spécialiste en déploiement, infrastructure cloud et sécurité pour une application scalable.
               </p>
