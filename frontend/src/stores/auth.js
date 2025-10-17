@@ -298,6 +298,38 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+
+
+// AJOUT FONCTIONNALITE
+// Connexion avec Google
+
+const signInWithGoogle = async () => {
+  try {
+    loading.value = true
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/dashboard', // redirection après login
+      },
+    })
+
+    if (error) throw error
+
+    toast.info('Redirection vers Google...')
+    return { success: true }
+  } catch (error) {
+    console.error('Erreur connexion Google:', error)
+    toast.error(error.message || 'Erreur lors de la connexion avec Google')
+    return { success: false, error: error.message }
+  } finally {
+    loading.value = false
+  }
+}
+
+
+
+
+
   return {
     // State
     user,
@@ -322,6 +354,7 @@ export const useAuthStore = defineStore('auth', () => {
     resetPassword,
     updateProfile,
     updatePassword,
+    signInWithGoogle,
   }
 })
 
