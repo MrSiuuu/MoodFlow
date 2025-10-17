@@ -20,6 +20,7 @@ import moodRoutes from './routes/moods.js';
 import aiRoutes from './routes/ai.js';
 import insightsRoutes from './routes/insights.js';
 import healthRoutes from './routes/health.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -68,6 +69,7 @@ app.use('/api/health', healthRoutes);
 app.use('/api/moods', authMiddleware, moodRoutes);
 app.use('/api/insights', authMiddleware, insightsRoutes);
 app.use('/api/ai', authMiddleware, aiRoutes);
+app.use('/api/admin', authMiddleware, adminRoutes);
 
 // Error handling
 app.use(errorHandler);
